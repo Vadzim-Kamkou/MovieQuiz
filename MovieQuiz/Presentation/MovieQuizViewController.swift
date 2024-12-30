@@ -4,35 +4,18 @@ import Foundation
 final class MovieQuizViewController: UIViewController {
  
     // Outlets
-    @IBOutlet weak var buttonYes: UIButton!
+   
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
 
-        buttonYes.tintColor = .ypWhite
+        //buttonYes.tintColor = .ypWhite
        // buttonYes.setTitleColor(.ypBlack, for: .normal)
        // buttonYes.setTitleColor(.ypBlack, for: .selected)
         
     }
-    
-    @IBAction func buttonYesTouchUpInside(_ sender: UIButton) {
-        
-        
-        
-  
-        print("!")
-    }
-    
-    
-    
-
-    
-    
-    
-    
+ 
     
 }
 
