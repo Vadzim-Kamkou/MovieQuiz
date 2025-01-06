@@ -3,18 +3,39 @@ import Foundation
 
 final class MovieQuizViewController: UIViewController {
  
+    // СТРУКТУРЫ
+    
+    // вопрос
+    struct QuizQuestion {
+      let image: String         // строка с названием фильма, совпадает с названием картинки в Assets
+      let text: String          // строка с вопросом о рейтинге фильма
+      let correctAnswer: Bool   // правильный ответ на вопрос true-false
+    }
+    
+    // вью модель для состояния "Вопрос показан"
+    struct QuizStepViewModel {
+      let image: UIImage            // картинка с афишей фильма
+      let question: String          // вопрос о рейтинге квиза
+      let questionNumber: String    // строка с порядковым номером этого вопроса (ex. "1/10")
+    }
+    
+    // вью модель для состояния "Результат квиза"
+    struct QuizResultsViewModel {
+      let title: String             // строка с заголовком алерта
+      let text: String              // строка с текстом о количестве набранных очков
+      let buttonText: String        // текст для кнопки алерта
+    }
+    
+    // ПЕРЕМЕННЫЕ
+
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var yesButton: UIButton!
     @IBOutlet weak private var noButton: UIButton!
     
-    // структура вопроса
-    struct QuizQuestion {
-      let image: String         // строка с названием фильма, совпадает с названием картинки в Assets
-      let text: String          // строка с вопросом о рейтинге фильма
-      let correctAnswer: Bool   // правильный ответ на вопрос true-false
-    }
+    private var currentQuestionIndex = 0    // индекс текущего вопроса
+    private var correctAnswers = 0          // cчётчик правильных ответов, начальное значение 0
 
     // массив вопросов
     private let questions: [QuizQuestion] = [
@@ -30,22 +51,7 @@ final class MovieQuizViewController: UIViewController {
         QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false)
     ]
     
-    // вью модель для состояния "Вопрос показан"
-    struct QuizStepViewModel {
-      let image: UIImage            // картинка с афишей фильма
-      let question: String          // вопрос о рейтинге квиза
-      let questionNumber: String    // строка с порядковым номером этого вопроса (ex. "1/10")
-    }
-    
-    // вью модель для состояния "Результат квиза"
-    struct QuizResultsViewModel {
-      let title: String             // строка с заголовком алерта
-      let text: String              // строка с текстом о количестве набранных очков
-      let buttonText: String        // текст для кнопки алерта
-    }
-
-    private var currentQuestionIndex = 0    // индекс текущего вопроса
-    private var correctAnswers = 0          // cчётчик правильных ответов, начальное значение 0
+    // ФУНКЦИИ
     
     // модификации после загрузки приложения
     override func viewDidLoad() {
@@ -57,6 +63,20 @@ final class MovieQuizViewController: UIViewController {
         let currentQuestion = questions[currentQuestionIndex]
         let currentQuestionViewModel = convert(model: currentQuestion)
         show(quiz: currentQuestionViewModel)
+    }
+     
+    // обрабатываем нажатие кнопки "Нет"
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        let currentQuestion = questions[currentQuestionIndex]
+        let givenAnswer = false
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    // обрабатываем нажатие кнопки "Да"
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        let currentQuestion = questions[currentQuestionIndex]
+        let givenAnswer = true
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
     // конвертируем вопрос и возвращаем ViewModel
@@ -77,20 +97,6 @@ final class MovieQuizViewController: UIViewController {
         counterLabel.text = step.questionNumber
         imageView.image = step.image
         textLabel.text = step.question
-    }
-     
-    // обрабатываем нажатие кнопки "Нет"
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex]
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-    
-    // обрабатываем нажатие кнопки "Да"
-    @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex]
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
     // обрабатываем ответ пользователя
