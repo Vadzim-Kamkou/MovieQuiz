@@ -52,6 +52,7 @@ final class MovieQuizViewController: UIViewController {
         super.viewDidLoad()
         
         // выводим первый вопрос
+        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         let currentQuestion = questions[currentQuestionIndex]
         let currentQuestionViewModel = convert(model: currentQuestion)
@@ -95,8 +96,7 @@ final class MovieQuizViewController: UIViewController {
     // обрабатываем ответ пользователя
     private func showAnswerResult(isCorrect: Bool) {
 
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.borderWidth = 8 // толщина рамки
+        imageView.layer.borderWidth = 8 // толщина рамки, повторно устанавливаем, т.к. при переключении вопросов showNextQuestionOrResults убираем рамку через borderWidth = 0
         
         if isCorrect {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
