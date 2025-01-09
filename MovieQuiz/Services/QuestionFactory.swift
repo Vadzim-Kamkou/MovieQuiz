@@ -1,7 +1,7 @@
 
 import Foundation
 
-class QuestionFactory {
+class QuestionFactory:QuestionFactoryProtocol {
     
     // массив вопросов
     private let questions: [QuizQuestion] = [
@@ -17,13 +17,16 @@ class QuestionFactory {
         QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false)
     ]
     
+   weak var delegate:QuestionFactoryDelegate?
     
-    func requestNextQuestion() -> QuizQuestion? {
-        
+    func requestNextQuestion() {
         guard let index = (0..<questions.count).randomElement() else {
-            return nil
+            delegate?.didReceiveNextQuestion(question: nil)
+            return
         }
-        return questions[safe: index]
+
+        let question = questions[safe: index]
+        delegate?.didReceiveNextQuestion(question: question)
     }
 }
 

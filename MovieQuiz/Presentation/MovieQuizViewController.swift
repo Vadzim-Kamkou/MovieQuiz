@@ -3,7 +3,7 @@ import Foundation
 
 // sprint_05
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
  
    
     
@@ -18,27 +18,42 @@ final class MovieQuizViewController: UIViewController {
     private var correctAnswers = 0          // cчётчик правильных ответов, начальное значение 0
 
     private let questionsAmount: Int = 10
-    private var questionFactory: QuestionFactory = QuestionFactory()
+    private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
-    // ФУНКЦИИ
+    // MARK: - Lifecycle
     
     // модификации после загрузки приложения
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // выводим первый вопрос
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
+        imageView.layer.masksToBounds = true
+        imageView.layer.cornerRadius = 20
         
-        if let firstQuestion = questionFactory.requestNextQuestion() {
-            currentQuestion = firstQuestion
-            let viewModel = convert(model: firstQuestion)
-            show(quiz: viewModel)
-            
+       
+        let questionFactory = QuestionFactory()
+        questionFactory.delegate = self
+        self.questionFactory = questionFactory
+        questionFactory.requestNextQuestion()
+          
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
         }
     }
      
+// MARK: - Actions
     // обрабатываем нажатие кнопки "Нет"
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         
@@ -60,6 +75,8 @@ final class MovieQuizViewController: UIViewController {
         let givenAnswer = true
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
+    
+// MARK: - Private Functions
     
     // конвертируем вопрос и возвращаем ViewModel
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -127,12 +144,7 @@ final class MovieQuizViewController: UIViewController {
                 showResult(quiz: quizResult)
         } else {
             currentQuestionIndex += 1
-            
-            if let nextQuestion = questionFactory.requestNextQuestion() {
-                currentQuestion = nextQuestion
-                let viewModel = convert(model: nextQuestion)
-                show(quiz: viewModel)
-            }
+            questionFactory?.requestNextQuestion()
         }
     }
     
@@ -152,11 +164,7 @@ final class MovieQuizViewController: UIViewController {
             self.correctAnswers = 0
             
             // заново показываем первый вопрос
-            if let firstQuestion = self.questionFactory.requestNextQuestion() {
-                self.currentQuestion = firstQuestion
-                let viewModel = self.convert(model: firstQuestion)
-                self.show(quiz: viewModel)
-            }
+            self.questionFactory?.requestNextQuestion()
         }
         
         alert.addAction(action)
