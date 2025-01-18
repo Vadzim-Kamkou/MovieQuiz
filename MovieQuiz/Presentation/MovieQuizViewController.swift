@@ -3,10 +3,8 @@ import Foundation
 
 // sprint_05
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
- 
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
    
-    
     // ПЕРЕМЕННЫЕ
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
@@ -21,26 +19,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
-    // MARK: - Lifecycle
+    private var alertPresenter: AlertPresenter?
     
-    // модификации после загрузки приложения
+    // MARK: - Lifecycle DidLoad
+    
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         
         // выводим первый вопрос
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = 20
         
-       
         let questionFactory = QuestionFactory()
         questionFactory.delegate = self
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
-          
+        
     }
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
+        
         guard let question = question else {
             return
         }
@@ -52,7 +52,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self?.show(quiz: viewModel)
         }
     }
-     
+    
+    // MARK: - ActionPresenterDelegate
+    func didReceiveResultView(alertResult: UIAlertController, alertAction: UIAlertAction) {
+        
+        self.present(alertResult, animated: true, completion: nil)
+    }
+    
+    
 // MARK: - Actions
     // обрабатываем нажатие кнопки "Нет"
     @IBAction private func noButtonClicked(_ sender: UIButton) {
@@ -131,43 +138,34 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         if currentQuestionIndex == questionsAmount - 1 {
             
-            let text = correctAnswers == questionsAmount ?
-                        "Поздравляем, вы ответили на 10 из 10!" :
-                        "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
+            // готовим AlertPresenter
+            let alertPresenter = AlertPresenter()
+            alertPresenter.delegate = self
+            self.alertPresenter = alertPresenter
             
+            // готовим данные для модели
+            let text = correctAnswers == questionsAmount 
+                ? "Поздравляем, вы ответили на 10 из 10!"
+                : "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
             
-            let quizResult = QuizResultsViewModel(
+            let quizResult = AlertModel(
                 title: "Этот раунд окончен!",
                 text: text,
-                buttonText: "Сыграть еще раз")
+                buttonText: "Сыграть еще раз", 
+                completion: restartQuiz)
             
-                showResult(quiz: quizResult)
+            // передаем данные для модели
+            alertPresenter.showResult(result:quizResult)
+         
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
         }
     }
     
-    // вывод на экран алерта результата квиза и начинаем квиз заново
-    private func showResult(quiz result: QuizResultsViewModel) {
-
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-            
-            guard let self = self else { return }
-            
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            // заново показываем первый вопрос
-            self.questionFactory?.requestNextQuestion()
-        }
-        
-        alert.addAction(action)
-        self.present(alert, animated: true, completion: nil)
+    private func restartQuiz () {
+        self.currentQuestionIndex = 0
+        self.correctAnswers = 0
+        self.questionFactory?.requestNextQuestion()
     }
 }
