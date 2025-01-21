@@ -35,7 +35,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         questionFactory.delegate = self
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
-        
+  
     }
     
     // MARK: - QuestionFactoryDelegate
