@@ -4,8 +4,10 @@ import Foundation
 // sprint_05
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
+
+    
    
-    // ПЕРЕМЕННЫЕ
+    // MARK: - @IBOutlet
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet weak private var textLabel: UILabel!
@@ -21,6 +23,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     private var alertPresenter: AlertPresenter?
     
+    private var statisticService: StatisticServiceProtocol?
+    
+    private var resultMessage: String = ""
+    
+    
     // MARK: - Lifecycle DidLoad
     
     override func viewDidLoad() {
@@ -35,6 +42,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         questionFactory.delegate = self
         self.questionFactory = questionFactory
         questionFactory.requestNextQuestion()
+        
+        // инициируем статистику
+        
+        statisticService = StatisticService()
   
     }
     
@@ -142,16 +153,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             let alertPresenter = AlertPresenter()
             alertPresenter.delegate = self
             self.alertPresenter = alertPresenter
-            
+
             // готовим данные для модели
-            let text = correctAnswers == questionsAmount 
-                ? "Поздравляем, вы ответили на 10 из 10!"
-                : "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
-            
+            guard let statisticMessage:String = statisticService?.store(correct: correctAnswers, total: questionsAmount) else {return}
+                
             let quizResult = AlertModel(
                 title: "Этот раунд окончен!",
-                text: text,
-                buttonText: "Сыграть еще раз", 
+                text: statisticMessage,
+                buttonText: "Сыграть еще раз",
                 completion: restartQuiz)
             
             // передаем данные для модели

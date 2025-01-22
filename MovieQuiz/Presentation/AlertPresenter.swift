@@ -7,13 +7,13 @@ class AlertPresenter {
     
     func showResult (result:AlertModel) {
  
-        // описываем вид алерта, здесь только заголовок и сообщение + стиль алерта
+        // описываем вид алерта
         let alertResult = UIAlertController(
             title: result.title,
             message: result.text,
             preferredStyle: .alert)
         
-        // описываем действие по кнопке алерта, здесь
+        // описываем действие по кнопке алерта,
         let action = UIAlertAction(title: result.buttonText, style: .default) {_ in  result.completion()}
         
         alertResult.addAction(action)
