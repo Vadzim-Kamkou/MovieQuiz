@@ -74,14 +74,9 @@ final class StatisticService: StatisticServiceProtocol {
             storage.set(currentGameResult.date, forKey: "bestGameDate")
         }
         
-        // собираем текст для алерта, форматируем дату
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM.dd HH:mm"
-        let formattedDate:String = dateFormatter.string(from: self.bestGame.date)
-
         let text1: String = "Ваш результат: \(currentGameResult.correct)/\(currentGameResult.total)"
         let text2: String = "Количество сыгранных квизов: \(gamesCount)"
-        let text3: String = "Рекорд: \(self.bestGame.correct)/\(self.bestGame.total) (\(formattedDate))"
+        let text3: String = "Рекорд: \(self.bestGame.correct)/\(self.bestGame.total) (\(self.bestGame.date.dateTimeString))"
         let text4: String = String(format: "Средняя точность: %.2f", totalAccuracy*100) + "%"
         
         return "\(text1)\n\(text2)\n\(text3)\n\(text4)\n"
