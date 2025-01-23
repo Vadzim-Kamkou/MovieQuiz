@@ -1,10 +1,15 @@
 
 import UIKit
 
-
 // вью модель для состояния "Вопрос показан"
 struct QuizStepViewModel {
-  let image: UIImage            // картинка с афишей фильма
-  let question: String          // вопрос о рейтинге квиза
-  let questionNumber: String    // строка с порядковым номером этого вопроса (ex. "1/10")
+    
+    // картинка с афишей фильма
+    let image: UIImage
+    
+    // вопрос о рейтинге квиза
+    let question: String
+    
+    // строка с порядковым номером этого вопроса (ex. "1/10")
+    let questionNumber: String
 }

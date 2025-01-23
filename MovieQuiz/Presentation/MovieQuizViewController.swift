@@ -1,12 +1,10 @@
 import UIKit
 import Foundation
 
-// sprint_05
+final class MovieQuizViewController:UIViewController,
+                                    QuestionFactoryDelegate,
+                                    AlertPresenterDelegate {
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
-
-    
-   
     // MARK: - @IBOutlet
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
@@ -14,8 +12,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     @IBOutlet weak private var yesButton: UIButton!
     @IBOutlet weak private var noButton: UIButton!
     
-    private var currentQuestionIndex = 0    // индекс текущего вопроса
-    private var correctAnswers = 0          // cчётчик правильных ответов, начальное значение 0
+    private var currentQuestionIndex:Int = .zero
+    private var correctAnswers:Int = .zero
 
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
@@ -29,7 +27,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     
     // MARK: - Lifecycle DidLoad
-    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -44,7 +41,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         questionFactory.requestNextQuestion()
         
         // инициируем статистику
-        
         statisticService = StatisticService()
   
     }
@@ -52,7 +48,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
         
-        guard let question = question else {
+        guard let question else {
             return
         }
 
@@ -118,8 +114,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // обрабатываем ответ пользователя
     private func showAnswerResult(isCorrect: Bool) {
-
-        imageView.layer.borderWidth = 8 // толщина рамки, повторно устанавливаем, т.к. при переключении вопросов showNextQuestionOrResults убираем рамку через borderWidth = 0
+        
+        // толщина рамки, повторно устанавливаем, т.к. при переключении вопросов showNextQuestionOrResults убираем рамку через borderWidth = 0
+        imageView.layer.borderWidth = 8
         
         if isCorrect {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
@@ -135,7 +132,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         // запускаем задачу через 1 секунду c помощью диспетчера задач
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.showNextQuestionOrResults()
         }
     }

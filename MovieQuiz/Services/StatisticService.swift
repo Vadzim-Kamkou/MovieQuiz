@@ -50,13 +50,6 @@ final class StatisticService: StatisticServiceProtocol {
  
     func store(correct count: Int, total amount: Int) -> String {
     
-        //    Reset Statistics
-        //    storage.set(0, forKey: "gamesCount")
-        //    storage.set(0.0, forKey: "totalAccuracy")
-        //    storage.set(0, forKey: "correctAnswersInBestGame")
-        //    storage.set(0, forKey: "totalQuestionsInBestGame")
-        //    storage.set(Date(), forKey: "bestGameDate")
-        
         // обновляем количество игр
         gamesCount += 1
         
@@ -74,12 +67,12 @@ final class StatisticService: StatisticServiceProtocol {
             storage.set(currentGameResult.date, forKey: "bestGameDate")
         }
         
-        let text1: String = "Ваш результат: \(currentGameResult.correct)/\(currentGameResult.total)"
-        let text2: String = "Количество сыгранных квизов: \(gamesCount)"
-        let text3: String = "Рекорд: \(self.bestGame.correct)/\(self.bestGame.total) (\(self.bestGame.date.dateTimeString))"
-        let text4: String = String(format: "Средняя точность: %.2f", totalAccuracy*100) + "%"
+        let resultText: String = "Ваш результат: \(currentGameResult.correct)/\(currentGameResult.total)"
+        let countGameText: String = "Количество сыгранных квизов: \(gamesCount)"
+        let bestScoreText: String = "Рекорд: \(self.bestGame.correct)/\(self.bestGame.total) (\(self.bestGame.date.dateTimeString))"
+        let middleScoreText: String = String(format: "Средняя точность: %.2f", totalAccuracy*100) + "%"
         
-        return "\(text1)\n\(text2)\n\(text3)\n\(text4)\n"
+        return "\(resultText)\n\(countGameText)\n\(bestScoreText)\n\(middleScoreText)"
 
     }
 }
