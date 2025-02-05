@@ -11,6 +11,7 @@ final class MovieQuizViewController:UIViewController,
     @IBOutlet weak private var textLabel: UILabel!
     @IBOutlet weak private var yesButton: UIButton!
     @IBOutlet weak private var noButton: UIButton!
+    @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
     private var currentQuestionIndex:Int = .zero
     private var correctAnswers:Int = .zero
@@ -35,14 +36,13 @@ final class MovieQuizViewController:UIViewController,
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = 20
         
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
-        self.questionFactory = questionFactory
-        questionFactory.requestNextQuestion()
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         
         // инициируем статистику
         statisticService = StatisticService()
-  
+        
+        showLoadingIndicator()
+        questionFactory?.loadData()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -60,9 +60,17 @@ final class MovieQuizViewController:UIViewController,
         }
     }
     
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
     // MARK: - ActionPresenterDelegate
     func didReceiveResultView(alertResult: UIAlertController, alertAction: UIAlertAction) {
-        
         self.present(alertResult, animated: true, completion: nil)
     }
     
@@ -94,15 +102,10 @@ final class MovieQuizViewController:UIViewController,
     
     // конвертируем вопрос и возвращаем ViewModel
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        // создаем константу и вызываем конструктор
-        let questionStep = QuizStepViewModel(
-            // инициализируем картинку
-            image: UIImage(named: model.image) ?? UIImage(),
-            // забираем вопрос из моковых данных
+        return QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
-            // высчитываем номер вопроса
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-        return questionStep
     }
     
     // вывод на экран вопроса
@@ -174,4 +177,34 @@ final class MovieQuizViewController:UIViewController,
         self.correctAnswers = 0
         self.questionFactory?.requestNextQuestion()
     }
+    
+    // показываем индикатор загрузки данных
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+
+    }
+    
+    // скрываем индикатор загрузки данных
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        let model = AlertModel(title: "Ошибка",
+                               text: message,
+                               buttonText: "Попробовать еще раз") { [weak self] in
+                guard let self else { return }
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                self.questionFactory?.requestNextQuestion()
+            
+           }
+        let alertPresenter = AlertPresenter()
+        alertPresenter.delegate = self
+        self.alertPresenter = alertPresenter
+        alertPresenter.showResult(result:model)
+    }
+    
 }
