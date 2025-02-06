@@ -1,10 +1,9 @@
 import UIKit
-import Foundation
 
 final class MovieQuizViewController:UIViewController,
                                     QuestionFactoryDelegate,
                                     AlertPresenterDelegate {
-
+    
     // MARK: - @IBOutlet
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
@@ -15,7 +14,7 @@ final class MovieQuizViewController:UIViewController,
     
     private var currentQuestionIndex:Int = .zero
     private var correctAnswers:Int = .zero
-
+    
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
@@ -51,7 +50,7 @@ final class MovieQuizViewController:UIViewController,
         guard let question else {
             return
         }
-
+        
         currentQuestion = question
         let viewModel = convert(model: question)
         
@@ -64,7 +63,7 @@ final class MovieQuizViewController:UIViewController,
         activityIndicator.isHidden = true
         questionFactory?.requestNextQuestion()
     }
-
+    
     func didFailToLoadData(with error: Error) {
         showNetworkError(message: error.localizedDescription)
     }
@@ -75,7 +74,7 @@ final class MovieQuizViewController:UIViewController,
     }
     
     
-// MARK: - Actions
+    // MARK: - Actions
     // обрабатываем нажатие кнопки "Нет"
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         
@@ -98,7 +97,7 @@ final class MovieQuizViewController:UIViewController,
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-// MARK: - Private Functions
+    // MARK: - Private Functions
     
     // конвертируем вопрос и возвращаем ViewModel
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -153,10 +152,10 @@ final class MovieQuizViewController:UIViewController,
             let alertPresenter = AlertPresenter()
             alertPresenter.delegate = self
             self.alertPresenter = alertPresenter
-
+            
             // готовим данные для модели
             guard let statisticMessage:String = statisticService?.store(correct: correctAnswers, total: questionsAmount) else {return}
-                
+            
             let quizResult = AlertModel(
                 title: "Этот раунд окончен!",
                 text: statisticMessage,
@@ -165,7 +164,7 @@ final class MovieQuizViewController:UIViewController,
             
             // передаем данные для модели
             alertPresenter.showResult(result:quizResult)
-         
+            
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
@@ -182,7 +181,7 @@ final class MovieQuizViewController:UIViewController,
     private func showLoadingIndicator() {
         activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
         activityIndicator.startAnimating() // включаем анимацию
-
+        
     }
     
     // скрываем индикатор загрузки данных
@@ -195,12 +194,12 @@ final class MovieQuizViewController:UIViewController,
         let model = AlertModel(title: "Ошибка",
                                text: message,
                                buttonText: "Попробовать еще раз") { [weak self] in
-                guard let self else { return }
-                self.currentQuestionIndex = 0
-                self.correctAnswers = 0
-                self.questionFactory?.requestNextQuestion()
+            guard let self else { return }
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            self.questionFactory?.requestNextQuestion()
             
-           }
+        }
         let alertPresenter = AlertPresenter()
         alertPresenter.delegate = self
         self.alertPresenter = alertPresenter
