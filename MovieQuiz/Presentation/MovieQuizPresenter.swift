@@ -59,4 +59,34 @@ final class MovieQuizPresenter {
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
+    
+    func showNextQuestionOrResults() {
+       
+        if self.isLastQuestion() {
+            
+            guard let viewController else {
+                return print("showNextQuestionOrResults Guard")
+            }
+            
+            // готовим данные для модели
+            guard let statisticMessage:String = viewController.statisticService?.store(correct: viewController.correctAnswers, total: questionsAmount) else {return}
+            
+            let quizResult = AlertModel(
+                title: "Этот раунд окончен!",
+                text: statisticMessage,
+                buttonText: "Сыграть еще раз",
+                completion: viewController.restartQuiz)
+            
+            // передаем данные для модели
+            viewController.alertPresenter?.showResult(result:quizResult)
+            
+        } else {
+            self.switchToNextQuestion()
+            viewController?.questionFactory?.requestNextQuestion()
+        }
+        
+        
+    }
+    
+    
 }

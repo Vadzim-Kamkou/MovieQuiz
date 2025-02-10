@@ -14,14 +14,14 @@ final class MovieQuizViewController:UIViewController,
     
     private let presenter = MovieQuizPresenter()
     
-    private var correctAnswers:Int = .zero
+    var correctAnswers:Int = .zero
     
-    private var questionFactory: QuestionFactoryProtocol?
+    var questionFactory: QuestionFactoryProtocol?
     //private var currentQuestion: QuizQuestion?
     
-    private weak var alertPresenter: AlertPresenter?
+    weak var alertPresenter: AlertPresenter?
     
-    private var statisticService: StatisticServiceProtocol?
+    var statisticService: StatisticServiceProtocol?
     
     private var resultMessage: String = ""
     
@@ -104,43 +104,28 @@ final class MovieQuizViewController:UIViewController,
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             [weak self] in
             guard let self else { return }
-            self.showNextQuestionOrResults()
+            
+            self.prepareToNextQuestionOrResults()
         }
     }
     
     // показываем следующий вопрос или алерт результата квиза
-    func showNextQuestionOrResults() {
+    func prepareToNextQuestionOrResults() {
         
         self.yesButton.isEnabled = true
         self.noButton.isEnabled = true
         imageView.layer.borderWidth = 0
         
-        if presenter.isLastQuestion() {
-            
-            // готовим AlertPresenter
-            let alertPresenter = AlertPresenter()
-            alertPresenter.delegate = self
-            self.alertPresenter = alertPresenter
-            
-            // готовим данные для модели
-            guard let statisticMessage:String = statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount) else {return}
-            
-            let quizResult = AlertModel(
-                title: "Этот раунд окончен!",
-                text: statisticMessage,
-                buttonText: "Сыграть еще раз",
-                completion: restartQuiz)
-            
-            // передаем данные для модели
-            alertPresenter.showResult(result:quizResult)
-            
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-        }
+        // готовим AlertPresenter
+        let alertPresenter = AlertPresenter()
+        alertPresenter.delegate = self
+        self.alertPresenter = alertPresenter
+
+        presenter.showNextQuestionOrResults()
+         
     }
     
-    private func restartQuiz () {
+    func restartQuiz () {
         self.presenter.resetQuestionIndex()
         self.correctAnswers = 0
         self.questionFactory?.requestNextQuestion()
