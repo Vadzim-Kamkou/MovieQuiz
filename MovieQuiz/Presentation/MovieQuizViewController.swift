@@ -12,10 +12,10 @@ final class MovieQuizViewController:UIViewController,
     @IBOutlet weak private var noButton: UIButton!
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
-    private var currentQuestionIndex:Int = .zero
+    private let presenter = MovieQuizPresenter()
+    
     private var correctAnswers:Int = .zero
     
-    private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
@@ -51,9 +51,10 @@ final class MovieQuizViewController:UIViewController,
             return
         }
         
-        currentQuestion = question
-        let viewModel = convert(model: question)
         
+        currentQuestion = question
+        let viewModel = presenter.convert(model: question)
+
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
@@ -99,14 +100,6 @@ final class MovieQuizViewController:UIViewController,
     
     // MARK: - Private Functions
     
-    // конвертируем вопрос и возвращаем ViewModel
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        return QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    }
-    
     // вывод на экран вопроса
     private func show(quiz step: QuizStepViewModel) {
         counterLabel.text = step.questionNumber
@@ -146,7 +139,7 @@ final class MovieQuizViewController:UIViewController,
         self.noButton.isEnabled = true
         imageView.layer.borderWidth = 0
         
-        if currentQuestionIndex == questionsAmount - 1 {
+        if presenter.isLastQuestion() {
             
             // готовим AlertPresenter
             let alertPresenter = AlertPresenter()
@@ -154,7 +147,7 @@ final class MovieQuizViewController:UIViewController,
             self.alertPresenter = alertPresenter
             
             // готовим данные для модели
-            guard let statisticMessage:String = statisticService?.store(correct: correctAnswers, total: questionsAmount) else {return}
+            guard let statisticMessage:String = statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount) else {return}
             
             let quizResult = AlertModel(
                 title: "Этот раунд окончен!",
@@ -166,13 +159,13 @@ final class MovieQuizViewController:UIViewController,
             alertPresenter.showResult(result:quizResult)
             
         } else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
         }
     }
     
     private func restartQuiz () {
-        self.currentQuestionIndex = 0
+        self.presenter.resetQuestionIndex()
         self.correctAnswers = 0
         self.questionFactory?.requestNextQuestion()
     }
@@ -195,7 +188,7 @@ final class MovieQuizViewController:UIViewController,
                                text: message,
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self else { return }
-            self.currentQuestionIndex = 0
+            self.presenter.resetQuestionIndex()
             self.correctAnswers = 0
             self.questionFactory?.requestNextQuestion()
             
