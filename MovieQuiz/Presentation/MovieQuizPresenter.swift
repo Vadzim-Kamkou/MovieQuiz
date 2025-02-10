@@ -3,6 +3,7 @@ import UIKit
 
 final class MovieQuizPresenter {
     
+    var correctAnswers:Int = .zero
     let questionsAmount: Int = 10
     private var currentQuestionIndex:Int = .zero
     
@@ -18,7 +19,7 @@ final class MovieQuizPresenter {
         didAnswer(isYes: true)
     }
     
-    private func didAnswer(isYes: Bool) {
+    func didAnswer(isYes: Bool) {
         guard let currentQuestion = currentQuestion else {
             return
         }
@@ -26,7 +27,13 @@ final class MovieQuizPresenter {
         let givenAnswer = isYes
         
         viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    func didCorrectAnswer(isCorrect: Bool) {
+        if isCorrect {
+            correctAnswers += 1
         }
+    }
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
             guard let question = question else {
@@ -44,13 +51,15 @@ final class MovieQuizPresenter {
         currentQuestionIndex == questionsAmount - 1
     }
     
-    func resetQuestionIndex() {
+    func restartGame() {
         currentQuestionIndex = 0
+        correctAnswers = 0
     }
     
     func switchToNextQuestion() {
         currentQuestionIndex += 1
     }
+    
     
     // конвертируем вопрос и возвращаем ViewModel
     func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -69,7 +78,7 @@ final class MovieQuizPresenter {
             }
             
             // готовим данные для модели
-            guard let statisticMessage:String = viewController.statisticService?.store(correct: viewController.correctAnswers, total: questionsAmount) else {return}
+            guard let statisticMessage:String = viewController.statisticService?.store(correct: correctAnswers, total: questionsAmount) else {return}
             
             let quizResult = AlertModel(
                 title: "Этот раунд окончен!",
@@ -87,6 +96,7 @@ final class MovieQuizPresenter {
         
         
     }
+    
     
     
 }

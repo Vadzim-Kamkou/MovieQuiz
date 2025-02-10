@@ -13,9 +13,7 @@ final class MovieQuizViewController:UIViewController,
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
     private let presenter = MovieQuizPresenter()
-    
-    var correctAnswers:Int = .zero
-    
+
     var questionFactory: QuestionFactoryProtocol?
     //private var currentQuestion: QuizQuestion?
     
@@ -91,7 +89,7 @@ final class MovieQuizViewController:UIViewController,
         
         if isCorrect {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
-            correctAnswers += 1
+            presenter.didCorrectAnswer(isCorrect: isCorrect)
         } else {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
@@ -126,8 +124,7 @@ final class MovieQuizViewController:UIViewController,
     }
     
     func restartQuiz () {
-        self.presenter.resetQuestionIndex()
-        self.correctAnswers = 0
+        presenter.restartGame()
         self.questionFactory?.requestNextQuestion()
     }
     
@@ -149,8 +146,7 @@ final class MovieQuizViewController:UIViewController,
                                text: message,
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self else { return }
-            self.presenter.resetQuestionIndex()
-            self.correctAnswers = 0
+            presenter.restartGame()
             self.questionFactory?.requestNextQuestion()
             
         }
