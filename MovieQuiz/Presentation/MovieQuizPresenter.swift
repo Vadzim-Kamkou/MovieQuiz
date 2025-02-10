@@ -6,6 +6,30 @@ final class MovieQuizPresenter {
     let questionsAmount: Int = 10
     private var currentQuestionIndex:Int = .zero
     
+    var currentQuestion: QuizQuestion?
+    weak var viewController: MovieQuizViewController?
+    
+    // обрабатываем нажатие кнопки "Нет"
+    func noButtonClicked() {
+        
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
+        
+        let givenAnswer = false
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    func yesButtonClicked() {
+        
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
+        
+        let givenAnswer = true
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
     }

@@ -17,7 +17,7 @@ final class MovieQuizViewController:UIViewController,
     private var correctAnswers:Int = .zero
     
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
+    //private var currentQuestion: QuizQuestion?
     
     private weak var alertPresenter: AlertPresenter?
     
@@ -30,6 +30,8 @@ final class MovieQuizViewController:UIViewController,
     override func viewDidLoad() {
         
         super.viewDidLoad()
+        
+        presenter.viewController = self
         
         // выводим первый вопрос
         imageView.layer.masksToBounds = true
@@ -52,7 +54,7 @@ final class MovieQuizViewController:UIViewController,
         }
         
         
-        currentQuestion = question
+        presenter.currentQuestion = question
         let viewModel = presenter.convert(model: question)
 
         DispatchQueue.main.async { [weak self] in
@@ -73,29 +75,16 @@ final class MovieQuizViewController:UIViewController,
     func didReceiveResultView(alertResult: UIAlertController, alertAction: UIAlertAction) {
         self.present(alertResult, animated: true, completion: nil)
     }
-    
-    
     // MARK: - Actions
-    // обрабатываем нажатие кнопки "Нет"
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    @IBAction func noButtonClicked(_ sender: UIButton) {
+        //presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
     // обрабатываем нажатие кнопки "Да"
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        //presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
     }
     
     // MARK: - Private Functions
@@ -108,7 +97,7 @@ final class MovieQuizViewController:UIViewController,
     }
     
     // обрабатываем ответ пользователя
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         
         // толщина рамки, повторно устанавливаем, т.к. при переключении вопросов showNextQuestionOrResults убираем рамку через borderWidth = 0
         imageView.layer.borderWidth = 8
