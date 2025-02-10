@@ -48,18 +48,7 @@ final class MovieQuizViewController:UIViewController,
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        
-        guard let question else {
-            return
-        }
-        
-        
-        presenter.currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
+        presenter.didReceiveNextQuestion(question: question)
     }
     
     func didLoadDataFromServer() {
@@ -77,20 +66,18 @@ final class MovieQuizViewController:UIViewController,
     }
     // MARK: - Actions
     @IBAction func noButtonClicked(_ sender: UIButton) {
-        //presenter.currentQuestion = currentQuestion
         presenter.noButtonClicked()
     }
     
     // обрабатываем нажатие кнопки "Да"
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        //presenter.currentQuestion = currentQuestion
         presenter.yesButtonClicked()
     }
     
     // MARK: - Private Functions
     
     // вывод на экран вопроса
-    private func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         counterLabel.text = step.questionNumber
         imageView.image = step.image
         textLabel.text = step.question
@@ -122,7 +109,7 @@ final class MovieQuizViewController:UIViewController,
     }
     
     // показываем следующий вопрос или алерт результата квиза
-    private func showNextQuestionOrResults() {
+    func showNextQuestionOrResults() {
         
         self.yesButton.isEnabled = true
         self.noButton.isEnabled = true
