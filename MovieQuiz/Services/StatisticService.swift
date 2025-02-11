@@ -48,7 +48,7 @@ final class StatisticService: StatisticServiceProtocol {
     }
     
  
-    func store(correct count: Int, total amount: Int) -> String {
+    func store(correct count: Int, total amount: Int){
     
         // обновляем количество игр
         gamesCount += 1
@@ -61,18 +61,11 @@ final class StatisticService: StatisticServiceProtocol {
         
         // сравниваем какая игра лучше, если текущая лучше - сохраняем
         let currentGameResult:GameResult = GameResult(correct: count, total: amount, date: Date.now)
+        
         if currentGameResult.isBetterThan(self.bestGame) {
             storage.set(currentGameResult.correct, forKey: "correctAnswersInBestGame")
             storage.set(currentGameResult.total, forKey: "totalQuestionsInBestGame")
             storage.set(currentGameResult.date, forKey: "bestGameDate")
         }
-        
-        let resultText: String = "Ваш результат: \(currentGameResult.correct)/\(currentGameResult.total)"
-        let countGameText: String = "Количество сыгранных квизов: \(gamesCount)"
-        let bestScoreText: String = "Рекорд: \(self.bestGame.correct)/\(self.bestGame.total) (\(self.bestGame.date.dateTimeString))"
-        let middleScoreText: String = String(format: "Средняя точность: %.2f", totalAccuracy*100) + "%"
-        
-        return "\(resultText)\n\(countGameText)\n\(bestScoreText)\n\(middleScoreText)"
-
     }
 }

@@ -9,13 +9,15 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
     
     var currentQuestion: QuizQuestion?
     
-    
+    private let statisticService: StatisticServiceProtocol!
     private var questionFactory: QuestionFactoryProtocol?
     private weak var viewController: MovieQuizViewController?
     
     
     init(viewController: MovieQuizViewController) {
         self.viewController = viewController
+        
+        statisticService = StatisticService()
         
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
@@ -99,13 +101,15 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
             guard let viewController else {
                 return print("showNextQuestionOrResults Guard")
             }
+            // сохраняем статистику
+            viewController.statisticService?.store(correct: correctAnswers, total: questionsAmount)
             
             // готовим данные для модели
-            guard let statisticMessage:String = viewController.statisticService?.store(correct: correctAnswers, total: questionsAmount) else {return}
+            let message = makeResultsMessage()
             
             let quizResult = AlertModel(
                 title: "Этот раунд окончен!",
-                text: statisticMessage,
+                text: message,
                 buttonText: "Сыграть еще раз",
                 completion: viewController.restartQuiz)
             
@@ -118,6 +122,21 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
         }
         
         
+    }
+    
+    func makeResultsMessage() -> String {
+        
+        //statisticService.store(correct: correctAnswers, total: questionsAmount)
+        
+
+        let resultText: String = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
+        let countGameText: String = "Количество сыгранных квизов: \(statisticService.gamesCount)"
+        let bestScoreText: String = "Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))"
+        let middleScoreText: String = String(format: "Средняя точность: %.2f", statisticService.totalAccuracy*100) + "%"
+
+        let resultMessage:String = [resultText, countGameText, bestScoreText, middleScoreText].joined(separator: "\n")
+        return resultMessage
+ 
     }
     
     

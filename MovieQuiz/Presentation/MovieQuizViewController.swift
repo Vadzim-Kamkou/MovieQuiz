@@ -43,8 +43,6 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
     @IBAction func noButtonClicked(_ sender: UIButton) {
         presenter.noButtonClicked()
     }
-    
-    // обрабатываем нажатие кнопки "Да"
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
         presenter.yesButtonClicked()
     }
@@ -106,12 +104,10 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
     
     // показываем индикатор загрузки данных
     func showLoadingIndicator() {
-        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
-        activityIndicator.startAnimating() // включаем анимацию
-        
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
     }
     
-                                        
     // скрываем индикатор загрузки данных
     func hideLoadingIndicator() {
         activityIndicator.isHidden = true

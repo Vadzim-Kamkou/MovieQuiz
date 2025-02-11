@@ -12,8 +12,6 @@ final class AlertPresenter {
             message: result.text,
             preferredStyle: .alert)
         
-        print(result.text)
-        
         // описываем действие по кнопке алерта,
         let action = UIAlertAction(title: result.buttonText, style: .default) {_ in  result.completion()}
         
