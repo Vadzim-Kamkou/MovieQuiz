@@ -23,22 +23,6 @@ final class MovieQuizUITests: XCTestCase {
         continueAfterFailure = false
     }
     
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        try super.tearDownWithError()
-        
-        app.terminate()
-        app = nil
-    }
-    
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
-        
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-    
     func testYesButton() {
         sleep(3)
         let firstPoster = app.images["Poster"]
@@ -104,28 +88,22 @@ final class MovieQuizUITests: XCTestCase {
         XCTAssertTrue(indexLabel.label == "1/10")
     }
     
-    
-    
+
     func testScreenCast() throws { }
     
-    
-//    func testScreenCast() throws { }
-//    app.buttons["Да"]
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    button.tap()
-//    app.alerts["Этот раунд окончен!"].scrollViews.otherElements.buttons["Сыграть еще раз"].tap()
-//    func testScreenCast() throws { }
-    
-    
-    
-    
-    
+    func testExample() throws {
+        // UI tests must launch the application that they test.
+        let app = XCUIApplication()
+        app.launch()
+        
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    }
+   
+    override func tearDownWithError() throws {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        try super.tearDownWithError()
+        
+        app.terminate()
+        app = nil
+    }
 }
