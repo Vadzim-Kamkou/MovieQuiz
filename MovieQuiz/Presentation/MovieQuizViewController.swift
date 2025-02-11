@@ -1,8 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController:UIViewController,
-                                    QuestionFactoryDelegate,
-                                    AlertPresenterDelegate {
+final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
     
     // MARK: - @IBOutlet
     @IBOutlet weak private var counterLabel: UILabel!
@@ -12,11 +10,7 @@ final class MovieQuizViewController:UIViewController,
     @IBOutlet weak private var noButton: UIButton!
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
-    private let presenter = MovieQuizPresenter()
-
-    var questionFactory: QuestionFactoryProtocol?
-    //private var currentQuestion: QuizQuestion?
-    
+    private var presenter: MovieQuizPresenter!
     weak var alertPresenter: AlertPresenter?
     
     var statisticService: StatisticServiceProtocol?
@@ -29,33 +23,16 @@ final class MovieQuizViewController:UIViewController,
         
         super.viewDidLoad()
         
-        presenter.viewController = self
+        presenter = MovieQuizPresenter(viewController: self)
         
         // выводим первый вопрос
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = 20
         
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        
         // инициируем статистику
         statisticService = StatisticService()
         
         showLoadingIndicator()
-        questionFactory?.loadData()
-    }
-    
-    // MARK: - QuestionFactoryDelegate
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        presenter.didReceiveNextQuestion(question: question)
-    }
-    
-    func didLoadDataFromServer() {
-        activityIndicator.isHidden = true
-        questionFactory?.requestNextQuestion()
-    }
-    
-    func didFailToLoadData(with error: Error) {
-        showNetworkError(message: error.localizedDescription)
     }
     
     // MARK: - ActionPresenterDelegate
@@ -125,29 +102,28 @@ final class MovieQuizViewController:UIViewController,
     
     func restartQuiz () {
         presenter.restartGame()
-        self.questionFactory?.requestNextQuestion()
     }
     
     // показываем индикатор загрузки данных
-    private func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
         activityIndicator.startAnimating() // включаем анимацию
         
     }
     
+                                        
     // скрываем индикатор загрузки данных
-    private func hideLoadingIndicator() {
+    func hideLoadingIndicator() {
         activityIndicator.isHidden = true
     }
     
-    private func showNetworkError(message: String) {
+    func showNetworkError(message: String) {
         hideLoadingIndicator()
         let model = AlertModel(title: "Ошибка",
                                text: message,
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self else { return }
             presenter.restartGame()
-            self.questionFactory?.requestNextQuestion()
             
         }
         let alertPresenter = AlertPresenter()
