@@ -5,7 +5,7 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
     
     private let statisticService: StatisticServiceProtocol!
     private var questionFactory: QuestionFactoryProtocol?
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     
     private var currentQuestion: QuizQuestion?
     private var correctAnswers:Int = .zero
@@ -13,7 +13,7 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
     private var currentQuestionIndex:Int = .zero
     
     
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         statisticService = StatisticService()
@@ -98,7 +98,7 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
                 return
             }
             // сохраняем статистику
-            viewController.statisticService?.store(correct: correctAnswers, total: questionsAmount)
+            self.statisticService?.store(correct: correctAnswers, total: questionsAmount)
             
             // готовим данные для модели
             let message = makeResultsMessage()
@@ -110,7 +110,7 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
                 completion: restartGame)
             
             // передаем данные для модели
-            viewController.alertPresenter?.showResult(result:quizResult)
+            viewController.showResult(result:quizResult)
             
         } else {
             self.switchToNextQuestion()
@@ -138,7 +138,7 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
             [weak self] in
             guard let self else { return }
             
-            viewController?.prepareToNextQuestionOrResults()
+            proceedToNextQuestionOrResults()
         }
     }
 }

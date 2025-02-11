@@ -1,7 +1,7 @@
 import UIKit
 
-final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
-    
+final class MovieQuizViewController:UIViewController, MovieQuizViewControllerProtocol {
+
     // MARK: - @IBOutlet
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
@@ -11,7 +11,7 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
     private var presenter: MovieQuizPresenter!
-    weak var alertPresenter: AlertPresenter?
+    //weak var alertPresenter: AlertPresenter?
     var statisticService: StatisticServiceProtocol?
     
     
@@ -66,17 +66,6 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
         self.noButton.isEnabled = false
     }
     
-    // показываем следующий вопрос или алерт результата квиза
-    func prepareToNextQuestionOrResults() {
-        
-        // готовим AlertPresenter
-        let alertPresenter = AlertPresenter()
-        alertPresenter.delegate = self
-        self.alertPresenter = alertPresenter
-        
-        presenter.proceedToNextQuestionOrResults()
-    }
-    
     // показываем индикатор загрузки данных
     func showLoadingIndicator() {
         activityIndicator.isHidden = false
@@ -97,9 +86,22 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
             presenter.restartGame()
             
         }
-        let alertPresenter = AlertPresenter()
-        alertPresenter.delegate = self
-        self.alertPresenter = alertPresenter
-        alertPresenter.showResult(result:model)
+        showResult(result:model)
     }
+    
+    func showResult(result:AlertModel) { 
+        // описываем вид алерта
+        let alertResult = UIAlertController(
+            title: result.title,
+            message: result.text,
+            preferredStyle: .alert)
+        
+        // описываем действие по кнопке алерта,
+        let action = UIAlertAction(title: result.buttonText, style: .default) {_ in  result.completion()}
+        
+        alertResult.addAction(action)
+        
+        didReceiveResultView(alertResult: alertResult, alertAction: action)
+    }
+    
 }

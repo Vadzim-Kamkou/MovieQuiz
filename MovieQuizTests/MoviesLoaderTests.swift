@@ -69,7 +69,7 @@ class MoviesLoaderTests:XCTestCase {
         loader.loadMovies { result in
             // Then
             switch result {
-            case .success(let movies):
+            case .success(_):
                 // сравниваем данные с тем, что мы предполагали
                 expectation.fulfill()
             case .failure(_):
