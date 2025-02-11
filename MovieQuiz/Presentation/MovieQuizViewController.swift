@@ -12,15 +12,11 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
     
     private var presenter: MovieQuizPresenter!
     weak var alertPresenter: AlertPresenter?
-    
     var statisticService: StatisticServiceProtocol?
-    
-    private var resultMessage: String = ""
     
     
     // MARK: - Lifecycle DidLoad
     override func viewDidLoad() {
-        
         super.viewDidLoad()
         
         presenter = MovieQuizPresenter(viewController: self)
@@ -39,6 +35,7 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
     func didReceiveResultView(alertResult: UIAlertController, alertAction: UIAlertAction) {
         self.present(alertResult, animated: true, completion: nil)
     }
+    
     // MARK: - Actions
     @IBAction func noButtonClicked(_ sender: UIButton) {
         presenter.noButtonClicked()
@@ -48,58 +45,36 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
     }
     
     // MARK: - Private Functions
-    
     // вывод на экран вопроса
     func show(quiz step: QuizStepViewModel) {
+        
+        imageView.layer.borderWidth = 0
+        self.yesButton.isEnabled = true
+        self.noButton.isEnabled = true
+        
         counterLabel.text = step.questionNumber
         imageView.image = step.image
         textLabel.text = step.question
     }
     
-    // обрабатываем ответ пользователя
-    func showAnswerResult(isCorrect: Bool) {
-        
-        // толщина рамки, повторно устанавливаем, т.к. при переключении вопросов showNextQuestionOrResults убираем рамку через borderWidth = 0
+    func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.borderWidth = 8
-        
-        if isCorrect {
-            imageView.layer.borderColor = UIColor.ypGreen.cgColor
-            presenter.didCorrectAnswer(isCorrect: isCorrect)
-        } else {
-            imageView.layer.borderColor = UIColor.ypRed.cgColor
-        }
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         // блокируем кнопки ответов, до показа следующего вопроса
         self.yesButton.isEnabled = false
         self.noButton.isEnabled = false
-        
-        // запускаем задачу через 1 секунду c помощью диспетчера задач
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            [weak self] in
-            guard let self else { return }
-            
-            self.prepareToNextQuestionOrResults()
-        }
     }
     
     // показываем следующий вопрос или алерт результата квиза
     func prepareToNextQuestionOrResults() {
         
-        self.yesButton.isEnabled = true
-        self.noButton.isEnabled = true
-        imageView.layer.borderWidth = 0
-        
         // готовим AlertPresenter
         let alertPresenter = AlertPresenter()
         alertPresenter.delegate = self
         self.alertPresenter = alertPresenter
-
-        presenter.showNextQuestionOrResults()
-         
-    }
-    
-    func restartQuiz () {
-        presenter.restartGame()
+        
+        presenter.proceedToNextQuestionOrResults()
     }
     
     // показываем индикатор загрузки данных
@@ -127,5 +102,4 @@ final class MovieQuizViewController:UIViewController, AlertPresenterDelegate {
         self.alertPresenter = alertPresenter
         alertPresenter.showResult(result:model)
     }
-    
 }

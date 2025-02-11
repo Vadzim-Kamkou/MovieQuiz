@@ -3,15 +3,14 @@ import UIKit
 
 final class MovieQuizPresenter:QuestionFactoryDelegate {
     
-    var correctAnswers:Int = .zero
-    let questionsAmount: Int = 10
-    private var currentQuestionIndex:Int = .zero
-    
-    var currentQuestion: QuizQuestion?
-    
     private let statisticService: StatisticServiceProtocol!
     private var questionFactory: QuestionFactoryProtocol?
     private weak var viewController: MovieQuizViewController?
+    
+    private var currentQuestion: QuizQuestion?
+    private var correctAnswers:Int = .zero
+    private let questionsAmount: Int = 10
+    private var currentQuestionIndex:Int = .zero
     
     
     init(viewController: MovieQuizViewController) {
@@ -48,7 +47,6 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
         }
     }
     
-    // обрабатываем нажатие кнопки "Нет"
     func noButtonClicked() {
         didAnswer(isYes: false)
     }
@@ -57,12 +55,12 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
         didAnswer(isYes: true)
     }
     
-    func didAnswer(isYes: Bool) {
+    private func didAnswer(isYes: Bool) {
         guard let currentQuestion = currentQuestion else {
             return
         }
         let givenAnswer = isYes
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
     func didCorrectAnswer(isCorrect: Bool) {
@@ -85,7 +83,6 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
         currentQuestionIndex += 1
     }
     
-    
     // конвертируем вопрос и возвращаем ViewModel
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
@@ -94,12 +91,11 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
-    func showNextQuestionOrResults() {
-        
+    func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             
             guard let viewController else {
-                return print("showNextQuestionOrResults Guard")
+                return
             }
             // сохраняем статистику
             viewController.statisticService?.store(correct: correctAnswers, total: questionsAmount)
@@ -111,7 +107,7 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
                 title: "Этот раунд окончен!",
                 text: message,
                 buttonText: "Сыграть еще раз",
-                completion: viewController.restartQuiz)
+                completion: restartGame)
             
             // передаем данные для модели
             viewController.alertPresenter?.showResult(result:quizResult)
@@ -120,15 +116,9 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
             self.switchToNextQuestion()
             self.questionFactory?.requestNextQuestion()
         }
-        
-        
     }
     
     func makeResultsMessage() -> String {
-        
-        //statisticService.store(correct: correctAnswers, total: questionsAmount)
-        
-
         let resultText: String = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
         let countGameText: String = "Количество сыгранных квизов: \(statisticService.gamesCount)"
         let bestScoreText: String = "Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))"
@@ -136,9 +126,19 @@ final class MovieQuizPresenter:QuestionFactoryDelegate {
 
         let resultMessage:String = [resultText, countGameText, bestScoreText, middleScoreText].joined(separator: "\n")
         return resultMessage
- 
     }
     
-    
-    
+    // обрабатываем ответ пользователя
+    private func proceedWithAnswer(isCorrect: Bool) {
+        didCorrectAnswer(isCorrect: isCorrect)
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+        
+        // запускаем задачу через 1 секунду c помощью диспетчера задач
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            [weak self] in
+            guard let self else { return }
+            
+            viewController?.prepareToNextQuestionOrResults()
+        }
+    }
 }
